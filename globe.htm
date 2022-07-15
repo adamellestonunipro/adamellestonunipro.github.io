@@ -1,0 +1,192 @@
+
+<!-- saved from url=(0048)https://stellular-scone-156f16.netlify.app/globe -->
+<html><script src="chrome-extension://ljdobmomdgdljniojadhoplhkpialdid/page/prompt.js"></script><script src="chrome-extension://ljdobmomdgdljniojadhoplhkpialdid/page/runScript.js"></script><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <style> body { margin: 0; } </style>
+  <script src="globe_files/countries.js.download"></script>
+  <script src="globe_files/three"></script>
+
+  <script src="globe_files/globe.gl"></script><style type="text/css">.scene-container .clickable {
+  cursor: pointer;
+}</style><style type="text/css">.scene-nav-info {
+  bottom: 5px;
+  width: 100%;
+  text-align: center;
+  color: slategrey;
+  opacity: 0.7;
+  font-size: 10px;
+}
+
+.scene-tooltip {
+  top: 0;
+  color: lavender;
+  font-size: 15px;
+}
+
+.scene-nav-info, .scene-tooltip {
+  position: absolute;
+  font-family: sans-serif;
+  pointer-events: none;
+}
+
+.scene-container canvas:focus {
+  outline: none;
+}</style>
+<!--    <script src="../../dist/globe.gl.js"></script>-->
+<style>@media print {#ghostery-tracker-tally {display:none !important}}</style></head>
+
+<body cz-shortcut-listen="true">
+  <div id="globeViz"><div style="position: relative;"><div><div class="scene-container" style="position: relative; width: 2560px; height: 937px;"><div class="scene-nav-info" style="display: none;">Left-click: rotate, Mouse-wheel/middle-click: zoom, Right-click: pan</div><div class="scene-tooltip" style="top: 170px; left: 1746px; transform: translate(-68.2031%, 21px);"></div><canvas data-engine="three.js r142" width="2560" height="937" style="display: block; touch-action: none; width: 2560px; height: 937px;"></canvas><div style="overflow: hidden; position: absolute; top: 0px; pointer-events: none; width: 2560px; height: 937px;"><div class="sales" id="GB" draggable="false" style="position: absolute; user-select: none; transform: translate(-50%, -50%) translate(1268.34px, 186.595px); z-index: 7;"><p>United Kingdom<br>£10m</p><img src="./globe_files/sales.png" width="150/"></div><div class="sales" id="DE" draggable="false" style="position: absolute; user-select: none; transform: translate(-50%, -50%) translate(1319.64px, 197.069px); z-index: 9;"><p>Germany<br>£9m</p><img src="./globe_files/sales.png" width="150/"></div><div class="sales show" id="FR" draggable="false" style="position: absolute; user-select: none; transform: translate(-50%, -50%) translate(1289.56px, 210.201px); z-index: 10;"><p>France<br>£7m</p><img src="./globe_files/sales.png" width="150/"></div><div class="sales" id="BR" draggable="false" style="position: absolute; user-select: none; transform: translate(-50%, -50%) translate(1015.85px, 553.626px); z-index: 8;"><p>Brazil<br>£2m</p><img src="./globe_files/sales.png" width="150/"></div></div></div></div></div></div>
+
+  <style>
+    .sales {
+      background-color: rgba(0, 0, 0, 0.65);
+      border-radius: 25%;
+      z-index: 1 !important;
+    }
+
+    .sales.show {
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.65);
+      padding: 0 8px 28px;
+      z-index: 999 !important;
+    }
+
+    .sales p {
+      font-size: 12px;
+      font-weight: 600;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #00bfee;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      z-index: 1 !important;
+    }
+
+    .sales img {
+      display: none;
+    }
+
+    .sales.show img {
+      display: inline;
+      z-index: 999 !important;
+    }
+  </style>
+
+  <script>
+    const _altitude = 0.0;
+    const countries = getCountries();
+    const sales = [
+      { country: 'US', total: 28 },
+      { country: 'JP', total: 14 },
+      { country: 'GB', total: 10 },
+      { country: 'DE', total: 9 },
+      { country: 'FR', total: 7 },
+      { country: 'KR', total: 3 },
+      { country: 'CA', total: 4 },
+      { country: 'AU', total: 3 },
+      { country: 'BR', total: 2 },
+      { country: 'CN', total: 4 }
+  ]
+
+  const getDistance = (lat1, lng1, lat2, lng2) => Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lng1 - lng2, 2))
+
+  const getClosest = (lat, lng) => {
+    const closest = sales.reduce((prev, cur) =>
+    {
+      var country = countries[cur.country]
+      var dist = getDistance(country.lat, country.lng, lat, lng)
+      return prev && prev.dist < dist ? prev : { country: cur.country, dist }
+    }, null)
+    return closest.country
+  }
+
+  const showSales = country => {
+    var target = document.getElementById(country);
+    document.querySelectorAll('.sales').forEach(e => e != target && e.classList.remove('show'))
+    target.classList.toggle('show')
+  }
+
+  const onClick = ({lat, lng}) =>
+  {
+    const closest = getClosest(lat, lng)
+    console.log(closest);
+    showSales(closest)
+    wasClosest = closest
+  }
+
+  const getElementsData = (sales, country) => (
+    {
+      country: sales.country,
+      name: country.name,
+      total: sales.total,
+      lat: country.lat,
+      lng: country.lng,
+      htmlAltitude: _altitude,
+      altitude: _altitude,
+    })
+
+    const world = Globe()
+      //.globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .globeImageUrl('earth-dark-bright.jpg')
+       // Search for equirectangular projection images...
+      //.globeImageUrl('pngegg2.jpg')
+      .backgroundColor('#000')
+      //.bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+      //.backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+      .onGlobeClick(onClick)
+      .htmlElementsData(
+        sales.map(s => getElementsData(s, countries[s.country]))
+      )
+      .htmlAltitude(d => _altitude)
+      .htmlElement(d => {
+        const el = document.createElement('div');
+        el.className = 'sales';
+        el.id = d.country
+        el.innerHTML = `<p>${d.name}<br>£${d.total}m</p><img src="sales.png" width=150/>`;
+        return el;
+      })
+      (document.getElementById('globeViz'));
+
+      var wasClosest
+      var wasLng
+      var wasLat
+      setInterval(() => {
+        var { lat, lng } = world.pointOfView()
+        var dist = getDistance(wasLat, wasLng, lat, lng)
+        if (Math.abs(dist) > 2 ||isNaN(dist))
+        {
+          const closest = getClosest(lat, lng)
+          if (closest != wasClosest)
+          {
+            showSales(closest)
+            wasClosest = closest
+          }
+          wasLat = lat
+          wasLng = lng
+        }
+       }, 100)
+
+    // Auto-rotate
+    //world.controls().autoRotate = true;
+    //world.controls().autoRotateSpeed = 0.35;
+
+    /*
+    // custom globe material
+    const globeMaterial = world.globeMaterial();
+    globeMaterial.bumpScale = 10;
+    new THREE.TextureLoader().load('//unpkg.com/three-globe/example/img/earth-water.png', texture => {
+      globeMaterial.specularMap = texture;
+      globeMaterial.specular = new THREE.Color('grey');
+      globeMaterial.shininess = 15;
+    });
+
+    setTimeout(() => { // wait for scene to be populated (asynchronously)
+      const directionalLight = world.scene().children.find(obj3d => obj3d.type === 'DirectionalLight');
+      directionalLight && directionalLight.position.set(1, 1, 1); // change light position to see the specularMap's effect
+    });
+    */
+  </script>
+
+
+
+</body></html>
